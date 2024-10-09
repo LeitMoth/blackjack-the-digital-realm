@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "818733020113",
+    "project_id": "blackjack-the-digital-realm",
+    "storage_bucket": "blackjack-the-digital-realm.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:818733020113:android:44beb30568ffc11526e6f0",
+        "android_client_info": {
+          "package_name": "com.example.blackjack_the_digital_realm"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyChgGUDeG2tsVatktorxTnC-AgI3wGKmlw"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
