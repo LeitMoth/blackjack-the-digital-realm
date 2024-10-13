@@ -122,6 +122,9 @@ class _HomePageState extends State<HomePage> {
 
   // Show when signed in (display functional d. box)
   void showLobbyDialog(BuildContext context) {
+    //TODO(colin): Testing, remove later
+    Provider.of<ApplicationState>(context, listen: false).makeLobby();
+
     showDialog(
       context: context,
       builder: (BuildContext context) {
