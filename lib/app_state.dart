@@ -20,6 +20,7 @@ class ApplicationState extends ChangeNotifier {
 
   StreamSubscription<QuerySnapshot>? _gameSubscription;
   List<GameState> _games = [];
+  List<GameState> get games => _games;
 
   Future<void> init() async {
     await Firebase.initializeApp(
@@ -40,11 +41,9 @@ class ApplicationState extends ChangeNotifier {
             .listen((snapshot) {
           _games = [];
           for (final document in snapshot.docs) {
-            _games.add(
-              GameState(
-                started: document.data()['started'] as bool,
-              )
-            );
+            _games.add(GameState(
+              started: document.data()['started'] as bool,
+            ));
           }
           notifyListeners();
         });
@@ -63,9 +62,7 @@ class ApplicationState extends ChangeNotifier {
       throw Exception('Must be logged in');
     }
 
-    return FirebaseFirestore.instance
-        .collection('games')
-        .add(<String, dynamic>{
+    return FirebaseFirestore.instance.collection('games').add(<String, dynamic>{
       'timestamp': DateTime.now().millisecondsSinceEpoch,
       'started': false,
       'playerNames': [FirebaseAuth.instance.currentUser!.displayName],
