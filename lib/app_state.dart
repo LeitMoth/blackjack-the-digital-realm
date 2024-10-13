@@ -6,6 +6,7 @@ import 'package:firebase_auth/firebase_auth.dart'
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_ui_auth/firebase_ui_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 
 import 'firebase_options.dart';
 import 'game_state.dart';
@@ -24,6 +25,11 @@ class ApplicationState extends ChangeNotifier {
   DocumentReference? _currentGameRef;
   GameState? _currentGame;
   bool get started => _currentGame?.started ?? false;
+  BuildContext? _waitingContext;
+
+  void queueToJoin(BuildContext ctx) {
+    _waitingContext = ctx;
+  }
 
   Future<void> init() async {
     await Firebase.initializeApp(
@@ -58,6 +64,9 @@ class ApplicationState extends ChangeNotifier {
               if (document.reference.id == _currentGameRef!.id) {
                 _currentGame = _games.last;
               }
+              if (_waitingContext != null) {
+                _waitingContext!.pushReplacement("/blackjack");
+              }
             }
           }
           notifyListeners();
@@ -69,7 +78,9 @@ class ApplicationState extends ChangeNotifier {
         _games = [];
         _currentGame = null;
         _currentGameRef = null;
+        _waitingContext = null;
       }
+      if (started) {}
       notifyListeners();
     });
   }

@@ -45,6 +45,14 @@ final _router = GoRouter(
     GoRoute(
       path: '/',
       builder: (context, state) => const HomePage(),
+      // redirect: (BuildContext context, GoRouterState state) {
+      //   var appState = Provider.of<ApplicationState>(context);
+      //   if (appState.started) {
+      //     return '/blackjack';
+      //   } else {
+      //     return null;
+      //   }
+      // },
       routes: [
         // Sign In route
         GoRoute(
@@ -117,6 +125,12 @@ final _router = GoRouter(
             );
           },
         ),
+        GoRoute(
+          path: 'blackjack',
+          builder: (context, state) {
+            return const Scaffold(body: Text("Blackjack!"));
+          }
+        )
       ],
     ),
   ],

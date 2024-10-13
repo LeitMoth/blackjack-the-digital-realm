@@ -43,75 +43,76 @@ class _HomePageState extends State<HomePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-        title: const Text('Blackjack: The Digital Realm'),
-      ),
-      body: Stack(
-        children: <Widget>[
-          Consumer<ApplicationState>(
-              builder: (context, appState, _) => Container(
-                    color: Colors.black,
-                    child: Column(
-                      children: <Widget>[
-                        Padding(
-                          padding: const EdgeInsets.symmetric(
-                              horizontal: 30.0, vertical: 30.0),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              const Text(
-                                // Make this either email or personable (check group)
-                                'Name',
-                                style: TextStyle(
-                                  color: Colors.white,
-                                  fontSize: 30,
-                                ),
-                              ),
-                              AuthFunc(
-                                loggedIn: appState.loggedIn,
-                                signOut: () {
-                                  FirebaseAuth.instance.signOut();
-                                },
-                              ),
-                            ],
+        appBar: AppBar(
+          backgroundColor: Theme.of(context).colorScheme.inversePrimary,
+          title: const Text('Blackjack: The Digital Realm'),
+        ),
+        body: Consumer<ApplicationState>(
+          builder: (context, appState, _) => Stack(
+            children: <Widget>[
+              Container(
+                color: Colors.black,
+                child: Column(
+                  children: <Widget>[
+                    Padding(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 30.0, vertical: 30.0),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          const Text(
+                            // Make this either email or personable (check group)
+                            'Name',
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 30,
+                            ),
                           ),
-                        ),
-                        for (GameState game in appState.games.where((g) => !g.started))
-                          Container(
-                              padding: const EdgeInsets.all(8.0),
-                              height: 90,
-                              margin: const EdgeInsets.symmetric(
-                                  vertical: 15, horizontal: 30),
-                              decoration: BoxDecoration(
-                                color: const Color.fromARGB(255, 79, 78, 78),
-                                borderRadius: BorderRadius.circular(6),
-                              ),
-                              child: Column(children: [
-                                Text("${game.started}"),
-                                Text("${game.playerIds}"),
-                                Text("${game.playerNames}"),
-                              ])),
-                      ],
+                          AuthFunc(
+                            loggedIn: appState.loggedIn,
+                            signOut: () {
+                              FirebaseAuth.instance.signOut();
+                            },
+                          ),
+                        ],
+                      ),
                     ),
-                  )),
-          Positioned(
-            bottom: 30,
-            left: 0,
-            right: 0,
-            child: Center(
-              child: ElevatedButton(
-                onPressed: () {
-                  //handle dialog decision
-                  handleMakeNewLobby(context);
-                },
-                child: const Text('Make New Lobby +'),
+                    for (GameState game
+                        in appState.games.where((g) => !g.started))
+                      Container(
+                          padding: const EdgeInsets.all(8.0),
+                          height: 90,
+                          margin: const EdgeInsets.symmetric(
+                              vertical: 15, horizontal: 30),
+                          decoration: BoxDecoration(
+                            color: const Color.fromARGB(255, 79, 78, 78),
+                            borderRadius: BorderRadius.circular(6),
+                          ),
+                          child: Column(children: [
+                            Text("${game.started}"),
+                            Text("${game.playerIds}"),
+                            Text("${game.playerNames}"),
+                          ])),
+                  ],
+                ),
               ),
-            ),
+              Positioned(
+                bottom: 30,
+                left: 0,
+                right: 0,
+                child: Center(
+                  child: ElevatedButton(
+                    onPressed: () {
+                      //handle dialog decision
+                      handleMakeNewLobby(context);
+                    },
+                    child: const Text('Make New Lobby +'),
+                  ),
+                ),
+              ),
+            ],
           ),
-        ],
-      ),
-    );
+        ));
   }
 
   // Decision for which screen
