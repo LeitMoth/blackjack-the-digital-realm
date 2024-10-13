@@ -1,3 +1,4 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart' // new
     hide
         EmailAuthProvider,
@@ -76,18 +77,21 @@ class _HomePageState extends State<HomePage> {
                             ],
                           ),
                         ),
-                        for (GameState game in appState.games)
+                        for (GameState game in appState.games.where((g) => !g.started))
                           Container(
-                            padding: const EdgeInsets.all(8.0),
-                            height: 90,
-                            margin: const EdgeInsets.symmetric(
-                                vertical: 15, horizontal: 30),
-                            decoration: BoxDecoration(
-                              color: const Color.fromARGB(255, 79, 78, 78),
-                              borderRadius: BorderRadius.circular(6),
-                            ),
-                            child: Text("${game.started}"),
-                          ),
+                              padding: const EdgeInsets.all(8.0),
+                              height: 90,
+                              margin: const EdgeInsets.symmetric(
+                                  vertical: 15, horizontal: 30),
+                              decoration: BoxDecoration(
+                                color: const Color.fromARGB(255, 79, 78, 78),
+                                borderRadius: BorderRadius.circular(6),
+                              ),
+                              child: Column(children: [
+                                Text("${game.started}"),
+                                Text("${game.playerIds}"),
+                                Text("${game.playerNames}"),
+                              ])),
                       ],
                     ),
                   )),
@@ -126,7 +130,10 @@ class _HomePageState extends State<HomePage> {
   // Show when signed in (display functional d. box)
   void showLobbyDialog(BuildContext context) {
     //TODO(colin): Testing, remove later
-    Provider.of<ApplicationState>(context, listen: false).makeLobby();
+    var state = Provider.of<ApplicationState>(context, listen: false);
+    state.makeLobby();
+
+    var time = Timestamp.now();
 
     showDialog(
       context: context,
@@ -134,7 +141,7 @@ class _HomePageState extends State<HomePage> {
         return AlertDialog(
           title: const Text('Start Game Diolog'),
           //change this to be the list of players in lobby
-          content: const Text('[ insert list of players here]'),
+          content: Text('[ insert list of players here $time]'),
           actions: <Widget>[
             TextButton(
               onPressed: () {
@@ -145,6 +152,7 @@ class _HomePageState extends State<HomePage> {
             ),
             TextButton(
               onPressed: () {
+                state.startGame();
                 //Closes screen when clicked (change this later)
                 Navigator.of(context).pop();
               },
