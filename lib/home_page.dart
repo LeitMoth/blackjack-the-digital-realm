@@ -133,6 +133,7 @@ class _HomePageState extends State<HomePage> {
     //TODO(colin): Testing, remove later
     var state = Provider.of<ApplicationState>(context, listen: false);
     state.makeLobby();
+    state.queueToJoin(context);
 
     var time = Timestamp.now();
 

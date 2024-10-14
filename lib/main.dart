@@ -128,7 +128,7 @@ final _router = GoRouter(
         GoRoute(
           path: 'blackjack',
           builder: (context, state) {
-            return const Scaffold(body: Text("Blackjack!"));
+            return const Scaffold(body: Column(children: [Text("Blackjack!")]));
           }
         )
       ],

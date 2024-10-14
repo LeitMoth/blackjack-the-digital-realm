@@ -64,8 +64,10 @@ class ApplicationState extends ChangeNotifier {
               if (document.reference.id == _currentGameRef!.id) {
                 _currentGame = _games.last;
               }
-              if (_waitingContext != null) {
+              if (started && _waitingContext != null) {
+                print("Moving to new context!");
                 _waitingContext!.pushReplacement("/blackjack");
+                _waitingContext = null;
               }
             }
           }
@@ -108,6 +110,7 @@ class ApplicationState extends ChangeNotifier {
       throw Exception('Can\'t start game without making lobby');
     }
 
+    print("updating current game data!");
     return _currentGameRef!.update(<String, dynamic>{'started': true});
   }
 
