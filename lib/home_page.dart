@@ -135,8 +135,7 @@ class _HomePageState extends State<HomePage> {
   void showLobbyDialog(BuildContext context) {
     //TODO(colin): Testing, remove later
     var state = Provider.of<ApplicationState>(context, listen: false);
-    state.makeLobby();
-    state.queueToJoin(context);
+    state.makeLobby(context);
 
     var time = Timestamp.now();
 

@@ -27,7 +27,7 @@ class ApplicationState extends ChangeNotifier {
   bool get started => _currentGame?.started ?? false;
   BuildContext? _waitingContext;
 
-  void queueToJoin(BuildContext ctx) {
+  void _queueToJoin(BuildContext ctx) {
     _waitingContext = ctx;
   }
 
@@ -88,15 +88,16 @@ class ApplicationState extends ChangeNotifier {
     });
   }
 
-  Future<DocumentReference> makeLobby() {
+  Future<DocumentReference> makeLobby(BuildContext ctx) {
     if (!_loggedIn) {
       throw Exception('Must be logged in');
     }
 
+    _queueToJoin(ctx);
     return FirebaseFirestore.instance.collection('games').add(<String, dynamic>{
       'timestamp': DateTime.now().millisecondsSinceEpoch,
       'started': false,
-      'playerNames': [FirebaseAuth.instance.currentUser!.displayName],
+      'playerNames': [FirebaseAuth.instance.currentUser!.displayName ?? "PLACEHOLDER_NAME"],
       'playerIds': [FirebaseAuth.instance.currentUser!.uid],
     }).then((ref) => _currentGameRef = ref);
   }
@@ -111,7 +112,7 @@ class ApplicationState extends ChangeNotifier {
       throw Exception('Can\'t start game without making lobby');
     }
 
-    print("updating current game data!");
+    // print("updating current game data!");
     return _currentGameRef!.update(<String, dynamic>{'started': true});
   }
 
@@ -120,13 +121,17 @@ class ApplicationState extends ChangeNotifier {
       throw Exception('Must be logged in');
     }
 
+    _queueToJoin(ctx);
     _currentGameRef = FirebaseFirestore.instance.collection('games').doc(docId);
-    var f = _currentGameRef!.update(<String,dynamic>{
-      'playerNames': [FirebaseAuth.instance.currentUser!.displayName],
-      'playerIds': [FirebaseAuth.instance.currentUser!.uid],
+    return _currentGameRef!.get().then((snap) {
+        var pns = snap['playerNames'] as List<String>;
+        pns.add(FirebaseAuth.instance.currentUser!.displayName ?? "PLACEHOLDER_NAME");
+        var pids = snap['playerIds'] as List<String>;
+        pids.add(FirebaseAuth.instance.currentUser!.uid);
+        _currentGameRef!.update(<String,dynamic>{
+              'playerNames': pns,
+              'playerIds': pids,
+        });
     });
-    queueToJoin(ctx);
-
-    return f;
   }
 }
