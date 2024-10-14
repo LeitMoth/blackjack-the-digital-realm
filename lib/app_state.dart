@@ -58,6 +58,7 @@ class ApplicationState extends ChangeNotifier {
               playerNames: (document.data()['playerNames'] as List<dynamic>)
                   .map((x) => x as String)
                   .toList(),
+              docId: document.reference.id,
             ));
 
             if (_currentGameRef != null) {
@@ -114,16 +115,18 @@ class ApplicationState extends ChangeNotifier {
     return _currentGameRef!.update(<String, dynamic>{'started': true});
   }
 
-  // Future<DocumentReference> joinLobby(String uid) {
-  //   if (!_loggedIn) {
-  //     throw Exception('Must be logged in');
-  //   }
-  //   return FirebaseFirestore.instance
-  //       .collection('games')
-  //       .add(<String, dynamic>{
-  //     'timestamp': DateTime.now().millisecondsSinceEpoch,
-  //     'playerNames': [FirebaseAuth.instance.currentUser!.displayName],
-  //     'playerIds': [FirebaseAuth.instance.currentUser!.uid],
-  //   });
-  // }
+  Future<void> joinLobby(String docId, BuildContext ctx) {
+    if (!_loggedIn) {
+      throw Exception('Must be logged in');
+    }
+
+    _currentGameRef = FirebaseFirestore.instance.collection('games').doc(docId);
+    var f = _currentGameRef!.update(<String,dynamic>{
+      'playerNames': [FirebaseAuth.instance.currentUser!.displayName],
+      'playerIds': [FirebaseAuth.instance.currentUser!.uid],
+    });
+    queueToJoin(ctx);
+
+    return f;
+  }
 }

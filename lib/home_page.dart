@@ -89,9 +89,12 @@ class _HomePageState extends State<HomePage> {
                             borderRadius: BorderRadius.circular(6),
                           ),
                           child: Column(children: [
-                            Text("${game.started}"),
-                            Text("${game.playerIds}"),
+                            // Text("${game.started}"),
+                            // Text("${game.playerIds}"),
                             Text("${game.playerNames}"),
+                            TextButton(onPressed: () {
+                              appState.joinLobby(game.docId, context);
+                            }, child: const Text("Join"))
                           ])),
                   ],
                 ),
