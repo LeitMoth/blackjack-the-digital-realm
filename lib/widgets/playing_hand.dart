@@ -2,8 +2,6 @@ import 'package:flutter/material.dart';
 
 import 'playing_card.dart';
 
-//TODO: How are we handling each player's perspective of the screen? that will determine how the view of the playing hand is
-//There needs to be a way to handle the playing hands on the side.
 class PlayingHand extends StatefulWidget {
   const PlayingHand({super.key, required this.side, required this.cards});
 
@@ -30,19 +28,60 @@ class PlayingHandState extends State<PlayingHand> {
   //     cards.add(playingCard);
   //   });
   // }
-
+  List<Widget> positions = [];
+  double shift = 50;
+  double containerSize = 75;
   @override
   Widget build(BuildContext context) {
+    positions = [];
+    shift = 50;
+    containerSize = (shift * widget.cards.length - 1) + 75;
+    positions.add(widget.cards[0]);
+    if (widget.cards.length > 1) {
+      int i = 1;
+      // print(widget.cards.length);
+      while (i < widget.cards.length) {
+        // print(i);
+        if (widget.side) {
+          positions.add(Positioned(top: shift, child: widget.cards[i]));
+        } else {
+          positions.add(Positioned(left: shift, child: widget.cards[i]));
+        }
+        shift += 50;
+        i += 1;
+      }
+      // print("ran");
+      // print(positions);
+    }
+
     switch (widget.side) {
       case true:
-        return Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: widget.cards,
+        // return Column(
+        //   mainAxisAlignment: MainAxisAlignment.center,
+        //   children: widget.cards,
+        // );
+        return Container(
+          padding: const EdgeInsets.all(8),
+          width: 100,
+          height: containerSize,
+          // color: Colors.black,
+          child: Stack(
+            children: positions,
+          ),
         );
       case false:
-        return Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: widget.cards,
+        // return Row(
+        //   mainAxisAlignment: MainAxisAlignment.center,
+        //   children: widget.cards,
+        // );
+        return Container(
+          padding: const EdgeInsets.all(8),
+          width: containerSize,
+          height: 150,
+          child: Stack(
+            // alignment: Alignment.center,
+            children: positions,
+          ),
         );
     }
   }
