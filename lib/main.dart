@@ -1,3 +1,4 @@
+import 'package:blackjack_the_digital_realm/game_screen.dart';
 import 'package:firebase_ui_auth/firebase_ui_auth.dart'; // New import
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart'; // New import
@@ -128,7 +129,8 @@ final _router = GoRouter(
         GoRoute(
           path: 'blackjack',
           builder: (context, state) {
-            return const Scaffold(body: Column(children: [Text("Blackjack!")]));
+            // return const Scaffold(body: Column(children: [Text("Blackjack!")]));
+            return const GameScreen();
           }
         )
       ],
