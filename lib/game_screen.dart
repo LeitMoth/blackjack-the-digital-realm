@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 
 import 'app_state.dart';
@@ -82,12 +83,21 @@ class GameScreenState extends State<GameScreen> {
   List<PlayingCard> getHand(List<int> l, {bool dealer = false}) {
     List<PlayingCard> h = [];
     for (int card in l) {
-      h.add(PlayingCard(text: dealer ? "D$card": "$card"));
+      h.add(PlayingCard(text: dealer ? "D$card" : "$card"));
     }
 
     return h;
   }
 
+  Widget score() {
+    return Scaffold(
+      appBar: AppBar(title: const Text("Score")),
+      body: Column(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [Text('a winner is you!')]),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -95,6 +105,10 @@ class GameScreenState extends State<GameScreen> {
       if (appState.loggedInState?.state case PlayingBlackjack playstate) {
         var gamestate = playstate.currentGame.state;
         var players = gamestate.playerIds.length;
+
+        if (gamestate.finished) {
+          return score();
+        }
 
         return Scaffold(
             appBar: AppBar(
@@ -111,7 +125,9 @@ class GameScreenState extends State<GameScreen> {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    PlayingHand(side: true, cards: players < 1 ? [] : getHand(gamestate.hand0)),
+                    PlayingHand(
+                        side: true,
+                        cards: players < 1 ? [] : getHand(gamestate.hand0)),
                     makePlayButtons(playstate),
                     PlayingHand(
                       side: true,

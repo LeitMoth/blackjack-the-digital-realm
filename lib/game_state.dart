@@ -1,6 +1,7 @@
 class GameState {
   GameState({
     required this.started,
+    // required this.finished,
     required this.playerIds,
     required this.playerNames,
     required this.cards,
@@ -15,6 +16,7 @@ class GameState {
   int timestamp;
   int turn;
   bool started;
+  // bool finished;
   List<String> playerIds;
   List<String> playerNames;
   List<int> cards;
@@ -23,27 +25,44 @@ class GameState {
   List<int> hand1;
   List<int> hand2;
 
+  static int handAmount(List<int> hand) {
+    return hand.fold(0, (x, y) => x + y);
+  }
+
   void hit() {
     int card = cards.removeLast();
-    switch (turn % playerIds.length) {
-      case 0:
-        hand0.add(card);
-        break;
-      case 1:
-        hand1.add(card);
-        break;
-      case 2:
-        hand2.add(card);
-        break;
-      default:
-        print("Huge problem!");
-        break;
+    var currentHand = switch (turn % playerIds.length) {
+      0 => hand0,
+      1 => hand1,
+      2 => hand2,
+      _ => throw "Hand not found"
+    };
+
+    currentHand.add(card);
+    if (handAmount(currentHand) > 21) {
+      print("Bust!");
+      stand();
     }
   }
 
+  bool get finished => turn == playerIds.length;
+
   void stand() {
     turn += 1;
-    turn %= playerIds.length;
+    if (turn == playerIds.length) {
+      playDealer();
+    }
+  }
+
+  void playDealer() {
+    while (handAmount(dealerHand) < 17) {
+      int card = cards.removeLast();
+      dealerHand.add(card);
+    }
+  }
+
+  List<int> winStatus() {
+    return [];
   }
 
   static List<N> getList<N>(dynamic thing) {
@@ -64,6 +83,7 @@ class GameState {
       hand1: getList<int>(data['hand1']),
       hand2: getList<int>(data['hand2']),
       started: data['started'] as bool,
+      // finished: data['finished'] as bool,
       playerIds: getList<String>(data['playerIds']),
       playerNames: getList<String>(data['playerNames']),
     );
@@ -79,6 +99,7 @@ class GameState {
       'hand2': hand2,
       'dealerHand': dealerHand,
       'started': started,
+      // 'finished': finished,
       'playerIds': playerIds,
       'playerNames': playerNames,
     };
