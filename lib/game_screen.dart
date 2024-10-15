@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
+import 'app_state.dart';
 import 'widgets/playing_card.dart';
 import 'widgets/playing_hand.dart';
 
@@ -14,7 +16,7 @@ class GameScreen extends StatefulWidget {
 //TODO: make a custom back arrow
 
 class GameScreenState extends State<GameScreen> {
-  int turn = 0;
+  // int turn = 0;
 
   List<PlayingCard> hand0 = [
     const PlayingCard(text: "Card 1"),
@@ -33,7 +35,7 @@ class GameScreenState extends State<GameScreen> {
     const PlayingCard(text: "Card 2")
   ];
 
-  void handleAddCard() {
+  void handleAddCard(int turn) {
     switch (turn) {
       case (0):
         hand0.add(const PlayingCard(text: "New Card"));
@@ -46,67 +48,79 @@ class GameScreenState extends State<GameScreen> {
     }
   }
 
+  Widget makePlayButtons(PlayingBlackjack state) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        ElevatedButton(
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.green,
+            ),
+            onPressed: !state.isMyTurn()
+                ? null
+                : () {
+                    setState(() {
+                      handleAddCard(state.currentGame.state.turn);
+                    });
+                  },
+            child: const Text("Add Card")),
+        ElevatedButton(
+            onPressed: !state.isMyTurn()
+                ? null
+                : () {
+                    state.currentGame.state.turn += 1;
+                    state.currentGame.state.turn %= state.currentGame.state.playerIds.length;
+                    state.currentGame.push();
+                  },
+            child: const Text("End Turn"))
+      ],
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-        appBar: AppBar(
-          title: const Text("Game Screen"),
-        ),
-        body: Column(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: [
-            PlayingHand(
-              side: false,
-              cards: hand0,
+    return Consumer<ApplicationState>(builder: (ctx, appState, _) {
+      if (appState.loggedInState?.state case PlayingBlackjack playstate) {
+        return Scaffold(
+            appBar: AppBar(
+              title: const Text("Game Screen"),
             ),
-            Row(
+            body: Column(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              crossAxisAlignment: CrossAxisAlignment.center,
               children: [
-                PlayingHand(side: true, cards: hand1),
+                PlayingHand(
+                  side: false,
+                  cards: hand0,
+                ),
                 Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    ElevatedButton(
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.green,
-                        ),
-                        onPressed: () {
-                          setState(() {
-                            handleAddCard();
-                          });
-                        },
-                        child: const Text("Add Card")),
-                    ElevatedButton(
-                        onPressed: () {
-                          //end turn
-                          if (turn == 3) {
-                            turn = 0;
-                          }
-                          turn += 1;
-                        },
-                        child: const Text("End Turn"))
+                    PlayingHand(side: true, cards: hand1),
+                    makePlayButtons(playstate),
+                    PlayingHand(
+                      side: true,
+                      cards: hand2,
+                    )
                   ],
                 ),
                 PlayingHand(
-                  side: true,
-                  cards: hand2,
-                )
+                  side: false,
+                  cards: hand3,
+                ),
               ],
             ),
-            PlayingHand(
-              side: false,
-              cards: hand3,
-            ),
-          ],
-        ),
-        floatingActionButton: FloatingActionButton(onPressed: () {
-          setState(() {
-            hand1.add(const PlayingCard(text: "Extra Card"));
-            hand2.add(const PlayingCard(text: "Extra Card"));
-            hand3.add(const PlayingCard(text: "Extra Card"));
-            hand0.add(const PlayingCard(text: "Extra Card"));
-          });
-        }));
+            floatingActionButton: FloatingActionButton(onPressed: () {
+              setState(() {
+                hand1.add(const PlayingCard(text: "Extra Card"));
+                hand2.add(const PlayingCard(text: "Extra Card"));
+                hand3.add(const PlayingCard(text: "Extra Card"));
+                hand0.add(const PlayingCard(text: "Extra Card"));
+              });
+            }));
+      } else {
+        return Scaffold(appBar: AppBar(title: const Text("BIG ERROR!")));
+      }
+    });
   }
 }

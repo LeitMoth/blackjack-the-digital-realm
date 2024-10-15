@@ -40,7 +40,8 @@ class EntangledGame {
   static Future<EntangledGame> fromId(String id) {
     return FirebaseFirestore.instance.collection('games').doc(id).get().then(
         (snap) => EntangledGame(
-            state: GameState.deserialize(snap.data() as Map<String, dynamic>), docId: id));
+            state: GameState.deserialize(snap.data() as Map<String, dynamic>),
+            docId: id));
   }
 }
 
@@ -56,8 +57,13 @@ class WaitingToJoin extends BlackjackState {
 }
 
 class PlayingBlackjack extends BlackjackState {
-  PlayingBlackjack({required this.currentGame});
+  PlayingBlackjack({required this.currentGame, required this.myUserId});
   EntangledGame currentGame;
+  String myUserId;
+
+  bool isMyTurn() {
+    return currentGame.state.playerIds[currentGame.state.turn] == myUserId;
+  }
 }
 
 class LoggedInState {
@@ -81,24 +87,28 @@ class LoggedInState {
                 print("Moving to new page!");
                 // TODO(colin) change back to pushReplacement eventually
                 ctx.push("/blackjack");
-                state = PlayingBlackjack(currentGame: currentGame);
+                state = PlayingBlackjack(
+                    currentGame: currentGame,
+                    myUserId: FirebaseAuth.instance.currentUser!.uid);
               } else {
                 print("WARNING! context hack broke 2!!!");
               }
             }
           });
           break;
-        case PlayingBlackjack():
+        case PlayingBlackjack(currentGame: EntangledGame currentGame):
+          currentGame.pull().then((_) => notifyChangeCallback());
           break;
       }
 
       games = [];
       for (final document in snapshot.docs) {
-        games.add(
-          (document.reference.id,
-        GameState.deserialize(
-          document.data(),
-        )));
+        games.add((
+          document.reference.id,
+          GameState.deserialize(
+            document.data(),
+          )
+        ));
       }
 
       notifyChangeCallback();
@@ -106,7 +116,7 @@ class LoggedInState {
   }
 
   late StreamSubscription<QuerySnapshot> gameSubscription;
-  List<(String,GameState)> games = [];
+  List<(String, GameState)> games = [];
   BlackjackState state = NoBlackjack();
 
   void deinit() {
@@ -120,6 +130,7 @@ class LoggedInState {
 
     var lobby = GameState(
         timestamp: DateTime.now().millisecondsSinceEpoch,
+        turn: 0,
         started: false,
         playerNames: [name],
         playerIds: [uid],
@@ -137,6 +148,14 @@ class LoggedInState {
   void joinLobby(String docId, BuildContext ctx) async {
     print("JOINING LOBBY");
     var e = await EntangledGame.fromId(docId);
+
+    var name =
+        FirebaseAuth.instance.currentUser!.displayName ?? "PLACEHOLDER_NAME";
+    var uid = FirebaseAuth.instance.currentUser!.uid;
+    e.state.playerNames.add(name);
+    e.state.playerIds.add(uid);
+    e.push();
+
     if (ctx.mounted) {
       print("JOINING LOBBY MOOVIN STATE");
       state = WaitingToJoin(currentGame: e, navigationContext: ctx);
