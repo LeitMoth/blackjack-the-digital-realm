@@ -33,6 +33,9 @@ class PlayingHandState extends State<PlayingHand> {
   double containerSize = 75;
   @override
   Widget build(BuildContext context) {
+    if (widget.cards.isEmpty) {
+      return Container();
+    }
     positions = [];
     shift = 50;
     containerSize = (shift * widget.cards.length - 1) + 75;

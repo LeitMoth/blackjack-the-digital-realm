@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import 'app_state.dart';
+import 'game_state.dart';
 import 'widgets/playing_card.dart';
 import 'widgets/playing_hand.dart';
 
@@ -17,36 +18,36 @@ class GameScreen extends StatefulWidget {
 
 class GameScreenState extends State<GameScreen> {
   // int turn = 0;
-
-  List<PlayingCard> hand0 = [
-    const PlayingCard(text: "Card 1"),
-    const PlayingCard(text: "Card 2")
-  ];
-  List<PlayingCard> hand1 = [
-    const PlayingCard(text: "Card 1"),
-    const PlayingCard(text: "Card 2")
-  ];
-  List<PlayingCard> hand2 = [
-    const PlayingCard(text: "Card 1"),
-    const PlayingCard(text: "Card 2")
-  ];
-  List<PlayingCard> hand3 = [
-    const PlayingCard(text: "Card 1"),
-    const PlayingCard(text: "Card 2")
-  ];
-
-  void handleAddCard(int turn) {
-    switch (turn) {
-      case (0):
-        hand0.add(const PlayingCard(text: "New Card"));
-      case (1):
-        hand1.add(const PlayingCard(text: "New Card"));
-      case (2):
-        hand2.add(const PlayingCard(text: "New Card"));
-      case (3):
-        hand3.add(const PlayingCard(text: "New Card"));
-    }
-  }
+  //
+  // List<PlayingCard> dealerHand = [
+  //   const PlayingCard(text: "Card 1"),
+  //   const PlayingCard(text: "Card 2")
+  // ];
+  // List<PlayingCard> hand0 = [
+  //   const PlayingCard(text: "Card 1"),
+  //   const PlayingCard(text: "Card 2")
+  // ];
+  // List<PlayingCard> hand1 = [
+  //   const PlayingCard(text: "Card 1"),
+  //   const PlayingCard(text: "Card 2")
+  // ];
+  // List<PlayingCard> hand2 = [
+  //   const PlayingCard(text: "Card 1"),
+  //   const PlayingCard(text: "Card 2")
+  // ];
+  //
+  // void handleAddCard(int turn) {
+  //   switch (turn) {
+  //     case (0):
+  //       dealerHand.add(const PlayingCard(text: "New Card"));
+  //     case (1):
+  //       hand0.add(const PlayingCard(text: "New Card"));
+  //     case (2):
+  //       hand1.add(const PlayingCard(text: "New Card"));
+  //     case (3):
+  //       hand2.add(const PlayingCard(text: "New Card"));
+  //   }
+  // }
 
   Widget makePlayButtons(PlayingBlackjack state) {
     return Row(
@@ -60,7 +61,9 @@ class GameScreenState extends State<GameScreen> {
                 ? null
                 : () {
                     setState(() {
-                      handleAddCard(state.currentGame.state.turn);
+                      state.currentGame.state.hit();
+                      state.currentGame.push();
+                      // handleAddCard(state.currentGame.state.turn);
                     });
                   },
             child: const Text("Add Card")),
@@ -68,8 +71,7 @@ class GameScreenState extends State<GameScreen> {
             onPressed: !state.isMyTurn()
                 ? null
                 : () {
-                    state.currentGame.state.turn += 1;
-                    state.currentGame.state.turn %= state.currentGame.state.playerIds.length;
+                    state.currentGame.state.stand();
                     state.currentGame.push();
                   },
             child: const Text("End Turn"))
@@ -77,10 +79,23 @@ class GameScreenState extends State<GameScreen> {
     );
   }
 
+  List<PlayingCard> getHand(List<int> l, {bool dealer = false}) {
+    List<PlayingCard> h = [];
+    for (int card in l) {
+      h.add(PlayingCard(text: dealer ? "D$card": "$card"));
+    }
+
+    return h;
+  }
+
+
   @override
   Widget build(BuildContext context) {
     return Consumer<ApplicationState>(builder: (ctx, appState, _) {
       if (appState.loggedInState?.state case PlayingBlackjack playstate) {
+        var gamestate = playstate.currentGame.state;
+        var players = gamestate.playerIds.length;
+
         return Scaffold(
             appBar: AppBar(
               title: const Text("Game Screen"),
@@ -91,31 +106,31 @@ class GameScreenState extends State<GameScreen> {
               children: [
                 PlayingHand(
                   side: false,
-                  cards: hand0,
+                  cards: getHand(gamestate.dealerHand, dealer: true),
                 ),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    PlayingHand(side: true, cards: hand1),
+                    PlayingHand(side: true, cards: players < 1 ? [] : getHand(gamestate.hand0)),
                     makePlayButtons(playstate),
                     PlayingHand(
                       side: true,
-                      cards: hand2,
+                      cards: players < 2 ? [] : getHand(gamestate.hand1),
                     )
                   ],
                 ),
                 PlayingHand(
                   side: false,
-                  cards: hand3,
+                  cards: players < 3 ? [] : getHand(gamestate.hand2),
                 ),
               ],
             ),
             floatingActionButton: FloatingActionButton(onPressed: () {
               setState(() {
-                hand1.add(const PlayingCard(text: "Extra Card"));
-                hand2.add(const PlayingCard(text: "Extra Card"));
-                hand3.add(const PlayingCard(text: "Extra Card"));
-                hand0.add(const PlayingCard(text: "Extra Card"));
+                // hand0.add(const PlayingCard(text: "Extra Card"));
+                // hand1.add(const PlayingCard(text: "Extra Card"));
+                // hand2.add(const PlayingCard(text: "Extra Card"));
+                // dealerHand.add(const PlayingCard(text: "Extra Card"));
               });
             }));
       } else {

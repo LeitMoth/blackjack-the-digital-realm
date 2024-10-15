@@ -134,7 +134,12 @@ class LoggedInState {
         started: false,
         playerNames: [name],
         playerIds: [uid],
-        cards: []);
+        cards: [1,2,3,4,5,6,7,8,9,10,11,12],
+        dealerHand:[],
+        hand0:[],
+        hand1:[],
+        hand2:[],
+        );
 
     var e = await EntangledGame.fromState(lobby);
 
@@ -152,6 +157,7 @@ class LoggedInState {
     var name =
         FirebaseAuth.instance.currentUser!.displayName ?? "PLACEHOLDER_NAME";
     var uid = FirebaseAuth.instance.currentUser!.uid;
+    // These three must always be the same length
     e.state.playerNames.add(name);
     e.state.playerIds.add(uid);
     e.push();
