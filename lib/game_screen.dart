@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 import 'widgets/playing_card.dart';
 import 'widgets/playing_hand.dart';
 
+import 'dart:math';
+
 class GameScreen extends StatefulWidget {
   const GameScreen({super.key});
 
@@ -16,33 +18,61 @@ class GameScreen extends StatefulWidget {
 class GameScreenState extends State<GameScreen> {
   int turn = 0;
 
-  List<PlayingCard> hand0 = [
-    const PlayingCard(text: "Card 1"),
-    const PlayingCard(text: "Card 2")
-  ];
-  List<PlayingCard> hand1 = [
-    const PlayingCard(text: "Card 1"),
-    const PlayingCard(text: "Card 2")
-  ];
-  List<PlayingCard> hand2 = [
-    const PlayingCard(text: "Card 1"),
-    const PlayingCard(text: "Card 2")
-  ];
-  List<PlayingCard> hand3 = [
-    const PlayingCard(text: "Card 1"),
-    const PlayingCard(text: "Card 2")
-  ];
+  List<PlayingCard> hand0 = [];
+  List<PlayingCard> hand1 = [];
+  List<PlayingCard> hand2 = [];
+  List<PlayingCard> hand3 = [];
+
+  @override
+  void initState() {
+    super.initState();
+    hand0 = generateRandomHand();
+    hand1 = generateRandomHand();
+    hand2 = generateRandomHand();
+    hand3 = generateRandomHand();
+  }
+
+  PlayingCard randomCard() {
+    // Returns a random card
+    // TODO: Henry: Implement Random Suit Selection
+    Random random = Random();
+    int number = random.nextInt(13) + 1;
+    if(number == 1) {
+      return const PlayingCard(text: "A");
+    }
+    if (number == 11) {
+      return const PlayingCard(text: "J");
+    }
+    if (number == 12) {
+      return const PlayingCard(text: "Q");
+    }
+    if (number == 13) {
+      return const PlayingCard(text: "K");
+    }
+    else{
+      String cardValue = number.toString();
+      return PlayingCard(text: cardValue);
+    }
+  }
+
+  List<PlayingCard> generateRandomHand() {
+    return [
+      randomCard(), 
+      randomCard()
+    ];
+  }
 
   void handleAddCard() {
+    // TODO: Check for bust
     switch (turn) {
       case (0):
-        hand0.add(const PlayingCard(text: "New Card"));
+        hand0.add(randomCard());
       case (1):
-        hand1.add(const PlayingCard(text: "New Card"));
+        hand1.add(randomCard());
       case (2):
-        hand2.add(const PlayingCard(text: "New Card"));
+        hand2.add(randomCard());
       case (3):
-        hand3.add(const PlayingCard(text: "New Card"));
+        hand3.add(randomCard());
     }
   }
 
@@ -102,10 +132,10 @@ class GameScreenState extends State<GameScreen> {
         ),
         floatingActionButton: FloatingActionButton(onPressed: () {
           setState(() {
-            hand1.add(const PlayingCard(text: "Extra Card"));
-            hand2.add(const PlayingCard(text: "Extra Card"));
-            hand3.add(const PlayingCard(text: "Extra Card"));
-            hand0.add(const PlayingCard(text: "Extra Card"));
+            hand1.add(randomCard());
+            hand2.add(randomCard());
+            hand3.add(randomCard());
+            hand0.add(randomCard());
           });
         }));
   }

@@ -61,6 +61,7 @@ class PlayingHandState extends State<PlayingHand> {
         //   children: widget.cards,
         // );
         return Container(
+          // TODO: Edit so that the center of the card isn't overlapped, thus blocking the text
           padding: const EdgeInsets.all(8),
           width: 100,
           height: containerSize,
