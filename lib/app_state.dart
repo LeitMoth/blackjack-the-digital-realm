@@ -11,24 +11,162 @@ import 'package:go_router/go_router.dart';
 import 'firebase_options.dart';
 import 'game_state.dart';
 
+class EntangledGame {
+  EntangledGame({required this.state, required this.docId});
+  GameState state;
+  String docId;
+
+  DocumentReference get _ref =>
+      FirebaseFirestore.instance.collection('games').doc(docId);
+
+  Future<void> push() {
+    //https://stackoverflow.com/a/59020046
+    return _ref.update(state.serialize());
+  }
+
+  Future<void> pull() {
+    return _ref.get().then((snap) {
+      state = GameState.deserialize(snap.data() as Map<String, dynamic>);
+    });
+  }
+
+  static Future<EntangledGame> fromState(GameState lobby) {
+    return FirebaseFirestore.instance
+        .collection('games')
+        .add(lobby.serialize())
+        .then((ref) => EntangledGame(state: lobby, docId: ref.id));
+  }
+
+  static Future<EntangledGame> fromId(String id) {
+    return FirebaseFirestore.instance.collection('games').doc(id).get().then(
+        (snap) => EntangledGame(
+            state: GameState.deserialize(snap.data() as Map<String, dynamic>), docId: id));
+  }
+}
+
+sealed class BlackjackState {}
+
+class NoBlackjack extends BlackjackState {}
+
+class WaitingToJoin extends BlackjackState {
+  WaitingToJoin({required this.currentGame, required this.navigationContext});
+
+  EntangledGame currentGame;
+  BuildContext navigationContext;
+}
+
+class PlayingBlackjack extends BlackjackState {
+  PlayingBlackjack({required this.currentGame});
+  EntangledGame currentGame;
+}
+
+class LoggedInState {
+  LoggedInState(void Function() notifyChangeCallback) {
+    gameSubscription = FirebaseFirestore.instance
+        .collection('games')
+        .orderBy('timestamp', descending: true)
+        .snapshots()
+        .listen((snapshot) {
+      switch (state) {
+        case NoBlackjack():
+          break;
+        case WaitingToJoin(
+            currentGame: EntangledGame currentGame,
+            navigationContext: BuildContext ctx
+          ):
+          currentGame.pull().then((_) {
+            print("IN WAIT LOOP< START STAUTS <<${currentGame.state.started}");
+            if (currentGame.state.started) {
+              if (ctx.mounted) {
+                print("Moving to new page!");
+                // TODO(colin) change back to pushReplacement eventually
+                ctx.push("/blackjack");
+                state = PlayingBlackjack(currentGame: currentGame);
+              } else {
+                print("WARNING! context hack broke 2!!!");
+              }
+            }
+          });
+          break;
+        case PlayingBlackjack():
+          break;
+      }
+
+      games = [];
+      for (final document in snapshot.docs) {
+        games.add(
+          (document.reference.id,
+        GameState.deserialize(
+          document.data(),
+        )));
+      }
+
+      notifyChangeCallback();
+    });
+  }
+
+  late StreamSubscription<QuerySnapshot> gameSubscription;
+  List<(String,GameState)> games = [];
+  BlackjackState state = NoBlackjack();
+
+  void deinit() {
+    gameSubscription.cancel();
+  }
+
+  void makeLobby(BuildContext ctx) async {
+    var name =
+        FirebaseAuth.instance.currentUser!.displayName ?? "PLACEHOLDER_NAME";
+    var uid = FirebaseAuth.instance.currentUser!.uid;
+
+    var lobby = GameState(
+        timestamp: DateTime.now().millisecondsSinceEpoch,
+        started: false,
+        playerNames: [name],
+        playerIds: [uid],
+        cards: []);
+
+    var e = await EntangledGame.fromState(lobby);
+
+    if (ctx.mounted) {
+      state = WaitingToJoin(currentGame: e, navigationContext: ctx);
+    } else {
+      print("WARNING! The weird context hack broke!");
+    }
+  }
+
+  void joinLobby(String docId, BuildContext ctx) async {
+    print("JOINING LOBBY");
+    var e = await EntangledGame.fromId(docId);
+    if (ctx.mounted) {
+      print("JOINING LOBBY MOOVIN STATE");
+      state = WaitingToJoin(currentGame: e, navigationContext: ctx);
+    } else {
+      print("WARNING! The weird context hack broke! 333");
+    }
+  }
+
+  void startGame() {
+    if (state case WaitingToJoin w) {
+      w.currentGame.state.started = true;
+      w.currentGame.push();
+    } else {
+      print("Could not game, as we weren't in the waiting to join state");
+    }
+  }
+}
+
 class ApplicationState extends ChangeNotifier {
   ApplicationState() {
     init();
   }
 
-  bool _loggedIn = false;
-  bool get loggedIn => _loggedIn;
-
-  StreamSubscription<QuerySnapshot>? _gameSubscription;
-  List<GameState> _games = [];
-  List<GameState> get games => _games;
-  DocumentReference? _currentGameRef;
-  GameState? _currentGame;
-  bool get started => _currentGame?.started ?? false;
-  BuildContext? _waitingContext;
-
-  void _queueToJoin(BuildContext ctx) {
-    _waitingContext = ctx;
+  LoggedInState? loggedInState;
+  bool get loggedIn {
+    if (loggedInState case LoggedInState _) {
+      return true;
+    } else {
+      return false;
+    }
   }
 
   Future<void> init() async {
@@ -41,97 +179,12 @@ class ApplicationState extends ChangeNotifier {
 
     FirebaseAuth.instance.userChanges().listen((user) {
       if (user != null) {
-        _loggedIn = true;
-
-        _gameSubscription = FirebaseFirestore.instance
-            .collection('games')
-            .orderBy('timestamp', descending: true)
-            .snapshots()
-            .listen((snapshot) {
-          _games = [];
-          for (final document in snapshot.docs) {
-            _games.add(GameState(
-              started: document.data()['started'] as bool,
-              playerIds: (document.data()['playerIds'] as List<dynamic>)
-                  .map((x) => x as String)
-                  .toList(),
-              playerNames: (document.data()['playerNames'] as List<dynamic>)
-                  .map((x) => x as String)
-                  .toList(),
-              docId: document.reference.id,
-            ));
-
-            if (_currentGameRef != null) {
-              if (document.reference.id == _currentGameRef!.id) {
-                _currentGame = _games.last;
-              }
-              if (started && _waitingContext != null) {
-                print("Moving to new context!");
-                _waitingContext!.pushReplacement("/blackjack");
-                _waitingContext = null;
-              }
-            }
-          }
-          notifyListeners();
-        });
+        loggedInState = LoggedInState(notifyListeners);
       } else {
-        _loggedIn = false;
-
-        _gameSubscription?.cancel();
-        _games = [];
-        _currentGame = null;
-        _currentGameRef = null;
-        _waitingContext = null;
+        loggedInState?.deinit();
+        loggedInState = null;
       }
-      if (started) {}
       notifyListeners();
-    });
-  }
-
-  Future<DocumentReference> makeLobby(BuildContext ctx) {
-    if (!_loggedIn) {
-      throw Exception('Must be logged in');
-    }
-
-    _queueToJoin(ctx);
-    return FirebaseFirestore.instance.collection('games').add(<String, dynamic>{
-      'timestamp': DateTime.now().millisecondsSinceEpoch,
-      'started': false,
-      'playerNames': [FirebaseAuth.instance.currentUser!.displayName ?? "PLACEHOLDER_NAME"],
-      'playerIds': [FirebaseAuth.instance.currentUser!.uid],
-    }).then((ref) => _currentGameRef = ref);
-  }
-
-  //https://stackoverflow.com/a/59020046
-  Future<void> startGame() {
-    if (!_loggedIn) {
-      throw Exception('Must be logged in');
-    }
-
-    if (_currentGameRef == null) {
-      throw Exception('Can\'t start game without making lobby');
-    }
-
-    // print("updating current game data!");
-    return _currentGameRef!.update(<String, dynamic>{'started': true});
-  }
-
-  Future<void> joinLobby(String docId, BuildContext ctx) {
-    if (!_loggedIn) {
-      throw Exception('Must be logged in');
-    }
-
-    _queueToJoin(ctx);
-    _currentGameRef = FirebaseFirestore.instance.collection('games').doc(docId);
-    return _currentGameRef!.get().then((snap) {
-        var pns = snap['playerNames'] as List<String>;
-        pns.add(FirebaseAuth.instance.currentUser!.displayName ?? "PLACEHOLDER_NAME");
-        var pids = snap['playerIds'] as List<String>;
-        pids.add(FirebaseAuth.instance.currentUser!.uid);
-        _currentGameRef!.update(<String,dynamic>{
-              'playerNames': pns,
-              'playerIds': pids,
-        });
     });
   }
 }
