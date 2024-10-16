@@ -77,8 +77,10 @@ class _HomePageState extends State<HomePage> {
                         ],
                       ),
                     ),
-                    for ((String, GameState) idGame 
-                        in appState.loggedInState?.games.where((g) => !g.$2.started) ?? [])
+                    for ((String, GameState) idGame in appState
+                            .loggedInState?.games
+                            .where((g) => !g.$2.started) ??
+                        [])
                       Container(
                           padding: const EdgeInsets.all(8.0),
                           height: 90,
@@ -92,9 +94,12 @@ class _HomePageState extends State<HomePage> {
                             // Text("${game.started}"),
                             // Text("${game.playerIds}"),
                             Text("${idGame.$2.playerNames}"),
-                            TextButton(onPressed: () {
-                              appState.loggedInState?.joinLobby(idGame.$1, context);
-                            }, child: const Text("Join"))
+                            TextButton(
+                                onPressed: () {
+                                  appState.loggedInState
+                                      ?.joinLobby(idGame.$1, context);
+                                },
+                                child: const Text("Join"))
                           ])),
                   ],
                 ),
@@ -143,9 +148,19 @@ class _HomePageState extends State<HomePage> {
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: const Text('Start Game Diolog'),
+          title: const Text('In Lobby'),
           //change this to be the list of players in lobby
-          content: Text('[ insert list of players here $time]'),
+          content: Consumer<ApplicationState>(builder: (ctx, appState, _) {
+            // var l = appState.loggedInState!;
+            // var ps = [];
+            // if (l.state
+            //     case WaitingToJoin(currentGame: EntangledGame currentGame)) {
+            //   ps = currentGame.state.playerNames;
+            // }
+            //
+            // return Text('Players $ps');
+            return const Text('Players can now join your lobby, press start when ready.');
+          }),
           actions: <Widget>[
             TextButton(
               onPressed: () {

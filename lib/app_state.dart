@@ -71,6 +71,8 @@ class PlayingBlackjack extends BlackjackState {
 
 class LoggedInState {
   LoggedInState(void Function() notifyChangeCallback) {
+    notifyChange = notifyChangeCallback;
+
     gameSubscription = FirebaseFirestore.instance
         .collection('games')
         .orderBy('timestamp', descending: true)
@@ -114,11 +116,12 @@ class LoggedInState {
         ));
       }
 
-      notifyChangeCallback();
+      notifyChange();
     });
   }
 
   late StreamSubscription<QuerySnapshot> gameSubscription;
+  late void Function() notifyChange;
   List<(String, GameState)> games = [];
   BlackjackState state = NoBlackjack();
 
@@ -131,6 +134,25 @@ class LoggedInState {
         FirebaseAuth.instance.currentUser!.displayName ?? "PLACEHOLDER_NAME";
     var uid = FirebaseAuth.instance.currentUser!.uid;
 
+    var deck = <int>[];
+    for(int i = 1; i < 10; ++i) {
+      deck.add(i);
+      deck.add(i);
+      deck.add(i);
+      deck.add(i);
+    }
+    for(int i = 0; i < 4*4; ++i) {
+      deck.add(10);
+    }
+
+    deck.shuffle();
+
+    var hand0 = <int>[];
+    hand0.add(deck.removeLast());
+    hand0.add(deck.removeLast());
+
+    var dealerHand = <int>[deck.removeLast()];
+
     var lobby = GameState(
         timestamp: DateTime.now().millisecondsSinceEpoch,
         turn: 0,
@@ -138,9 +160,9 @@ class LoggedInState {
         finished: false,
         playerNames: [name],
         playerIds: [uid],
-        cards: [1,2,3,4,5,6,7,8,9,10,11,12],
-        dealerHand:[],
-        hand0:[],
+        cards: deck,
+        dealerHand:dealerHand,
+        hand0: hand0,
         hand1:[],
         hand2:[],
         );
@@ -152,6 +174,8 @@ class LoggedInState {
     } else {
       print("WARNING! The weird context hack broke!");
     }
+
+    notifyChange();
   }
 
   void joinLobby(String docId, BuildContext ctx) async {
@@ -162,8 +186,19 @@ class LoggedInState {
         FirebaseAuth.instance.currentUser!.displayName ?? "PLACEHOLDER_NAME";
     var uid = FirebaseAuth.instance.currentUser!.uid;
     // These three must always be the same length
+    int hand = e.state.playerIds.length;
     e.state.playerNames.add(name);
     e.state.playerIds.add(uid);
+    if (hand == 1) {
+      e.state.hand1.add(e.state.cards.removeLast());
+      e.state.hand1.add(e.state.cards.removeLast());
+    }
+    else if (hand == 2) {
+      e.state.hand2.add(e.state.cards.removeLast());
+      e.state.hand2.add(e.state.cards.removeLast());
+    } else {
+      print("hand error");
+    }
     e.push();
 
     if (ctx.mounted) {
@@ -172,6 +207,8 @@ class LoggedInState {
     } else {
       print("WARNING! The weird context hack broke! 333");
     }
+
+    notifyChange();
   }
 
   void startGame() {
