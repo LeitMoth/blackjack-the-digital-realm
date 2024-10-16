@@ -73,6 +73,8 @@ class LoggedInState {
   LoggedInState(void Function() notifyChangeCallback) {
     notifyChange = notifyChangeCallback;
 
+    name = FirebaseAuth.instance.currentUser?.displayName ?? "John Doe";
+
     gameSubscription = FirebaseFirestore.instance
         .collection('games')
         .orderBy('timestamp', descending: true)
@@ -122,6 +124,7 @@ class LoggedInState {
 
   late StreamSubscription<QuerySnapshot> gameSubscription;
   late void Function() notifyChange;
+  late String name;
   List<(String, GameState)> games = [];
   BlackjackState state = NoBlackjack();
 

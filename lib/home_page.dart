@@ -60,12 +60,12 @@ class _HomePageState extends State<HomePage> {
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          const Text(
+                          Text(
                             // Make this either email or personable (check group)
-                            'Name',
-                            style: TextStyle(
+                            appState.loggedInState?.name ?? "Log In",
+                            style: const TextStyle(
                               color: Colors.white,
-                              fontSize: 30,
+                              fontSize: 15,
                             ),
                           ),
                           AuthFunc(
