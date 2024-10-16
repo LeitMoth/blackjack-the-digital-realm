@@ -90,7 +90,7 @@ class GameScreenState extends State<GameScreen> {
                 : () {
                     state.currentGame.state.stand();
                     state.currentGame.push();
-                      queueForScoreIfNeeded(state.currentGame);
+                    queueForScoreIfNeeded(state.currentGame);
                   },
             child: const Text("End Turn"))
       ],
@@ -128,36 +128,37 @@ class GameScreenState extends State<GameScreen> {
         }
 
         return Scaffold(
-            appBar: AppBar(
-              title: const Text("Game Screen"),
-            ),
-            body: Column(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                PlayingHand(
+          appBar: AppBar(
+            title: const Text("Game Screen"),
+          ),
+          body: Column(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              PlayingHand(
                   side: false,
                   cards: getHand(gamestate.dealerHand, dealer: true),
-                ),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    PlayingHand(
-                        side: true,
-                        cards: players < 1 ? [] : getHand(gamestate.hand0)),
-                    makePlayButtons(playstate),
-                    PlayingHand(
+                  playerName: "The Dealer"),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  PlayingHand(
+                      side: true,
+                      cards: players < 1 ? [] : getHand(gamestate.hand0),
+                      playerName: players < 1 ? "" : gamestate.playerNames[0]),
+                  makePlayButtons(playstate),
+                  PlayingHand(
                       side: true,
                       cards: players < 2 ? [] : getHand(gamestate.hand1),
-                    )
-                  ],
-                ),
-                PlayingHand(
+                      playerName: players < 2 ? "" : gamestate.playerNames[1]),
+                ],
+              ),
+              PlayingHand(
                   side: false,
                   cards: players < 3 ? [] : getHand(gamestate.hand2),
-                ),
-              ],
-            ),
+                  playerName: players < 3 ? "" : gamestate.playerNames[2]),
+            ],
+          ),
         );
       } else {
         return Scaffold(appBar: AppBar(title: const Text("BIG ERROR!")));

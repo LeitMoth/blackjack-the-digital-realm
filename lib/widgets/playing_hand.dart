@@ -3,10 +3,11 @@ import 'package:flutter/material.dart';
 import 'playing_card.dart';
 
 class PlayingHand extends StatefulWidget {
-  const PlayingHand({super.key, required this.side, required this.cards});
+  const PlayingHand({super.key, required this.side, required this.cards, required this.playerName});
 
   final bool side;
   final List<PlayingCard> cards;
+  final String playerName;
 
   @override
   State<StatefulWidget> createState() {
@@ -40,6 +41,10 @@ class PlayingHandState extends State<PlayingHand> {
     shift = 50;
     containerSize = (shift * widget.cards.length - 1) + 75;
     positions.add(widget.cards[0]);
+    var shortName = widget.playerName;
+    if (shortName.length > 8) {
+      shortName = shortName.substring(0,8);
+    }
     if (widget.cards.length > 1) {
       int i = 1;
       // print(widget.cards.length);
@@ -63,22 +68,26 @@ class PlayingHandState extends State<PlayingHand> {
         //   mainAxisAlignment: MainAxisAlignment.center,
         //   children: widget.cards,
         // );
-        return Container(
-          // TODO: Edit so that the center of the card isn't overlapped, thus blocking the text
-          padding: const EdgeInsets.all(8),
-          width: 100,
-          height: containerSize,
-          // color: Colors.black,
-          child: Stack(
-            children: positions,
-          ),
-        );
+        return Column(mainAxisAlignment: MainAxisAlignment.center, children: [
+          Text(shortName),
+          Container(
+              padding: const EdgeInsets.all(8),
+              width: 100,
+              height: containerSize,
+              // color: Colors.black,
+              child: Stack(
+                children: positions,
+              )),
+        ]);
       case false:
         // return Row(
         //   mainAxisAlignment: MainAxisAlignment.center,
         //   children: widget.cards,
         // );
-        return Container(
+        return Column(mainAxisAlignment: MainAxisAlignment.center, children: [
+
+        Text(widget.playerName),
+        Container(
           padding: const EdgeInsets.all(8),
           width: containerSize,
           height: 150,
@@ -86,7 +95,7 @@ class PlayingHandState extends State<PlayingHand> {
             // alignment: Alignment.center,
             children: positions,
           ),
-        );
+        )]);
     }
   }
 }
