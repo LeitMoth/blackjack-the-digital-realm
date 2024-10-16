@@ -11,7 +11,12 @@ class PlayingCard extends StatelessWidget {
       child: SizedBox(
         height: 100,
         width: 76,
-        child: Center(child: Text(text)),
+        child: Align(
+            alignment: Alignment.topLeft,
+            child: Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: Text(text),
+            )),
       ),
     );
   }
