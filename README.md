@@ -1,16 +1,24 @@
-# blackjack_the_digital_realm
+# Blackjack: The Digital Realm
 
-A new Flutter project.
+A sleek and minimal re-imagining of blackjack, for the modern age.
 
-## Getting Started
+## Usage
 
-This project is a starting point for a Flutter application.
+This is an app for anyone who wants to play blackjack.
+No matter the distance between players, anyone can easily connect in *Blackjack: The Digital Realm*.
 
-A few resources to get you started if this is your first Flutter project:
+Create a lobby, wait for people to join, then press start.
+Or, join a lobby with the Join button, and wait for the host to press start.
 
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
+After playing a round, the Results screen will display who won the hand.
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+## Screenshots
+
+![screenshot1.png](images/btdr1.png)
+![screenshot2.png](images/btdr2.png)
+![screenshot3.png](images/btdr3.png)
+![screenshot4.png](images/btdr4.png)
+
+## EOL
+
+This is a learning project, and I will likely have shut down the firebase project that powers this by December 2024.
