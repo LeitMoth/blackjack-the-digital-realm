@@ -83,18 +83,42 @@ class _HomePageState extends State<HomePage> {
                         [])
                       Container(
                           padding: const EdgeInsets.all(8.0),
-                          height: 90,
+                          height: 110,
+                          width: 300,
                           margin: const EdgeInsets.symmetric(
                               vertical: 15, horizontal: 30),
                           decoration: BoxDecoration(
                             color: const Color.fromARGB(255, 79, 78, 78),
                             borderRadius: BorderRadius.circular(6),
                           ),
-                          child: Column(children: [
-                            // Text("${game.started}"),
-                            // Text("${game.playerIds}"),
-                            Text("${idGame.$2.playerNames}"),
-                            TextButton(
+                          child: Row(children: [
+                            SizedBox(
+                                width: 220,
+                                child: Column(children: [
+                                  const Text(
+                                    "Open Lobby",
+                                    style: TextStyle(
+                                      color: Colors.white,
+                                      fontSize: 22,
+                                    ),
+                                  ),
+                                  const Text(
+                                    "Players:",
+                                    style: TextStyle(
+                                      color: Colors.white,
+                                      // fontSize: 20,
+                                    ),
+                                  ),
+                                  // Text("${game.started}"),
+                                  // Text("${game.playerIds}"),
+                                  Text(
+                                    "${idGame.$2.playerNames}",
+                                    style: const TextStyle(
+                                      color: Colors.white,
+                                    ),
+                                  ),
+                                ])),
+                            FloatingActionButton(
                                 onPressed: () {
                                   appState.loggedInState
                                       ?.joinLobby(idGame.$1, context);
@@ -159,7 +183,8 @@ class _HomePageState extends State<HomePage> {
             // }
             //
             // return Text('Players $ps');
-            return const Text('Players can now join your lobby, press start when ready.');
+            return const Text(
+                'Players can now join your lobby, press start when ready.');
           }),
           actions: <Widget>[
             TextButton(
