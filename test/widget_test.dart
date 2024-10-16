@@ -13,10 +13,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:blackjack_the_digital_realm/main.dart';
 import 'package:blackjack_the_digital_realm/home_page.dart';
-import 'package:blackjack_the_digital_realm/game_screen.dart';
 import 'package:provider/provider.dart';
-import 'package:firebase_core/firebase_core.dart';
-import 'package:blackjack_the_digital_realm/firebase_options.dart';
+
 
 void main() {
   testWidgets('HomePage renders with correct title and app state', (WidgetTester tester) async {
