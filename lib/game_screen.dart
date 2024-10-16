@@ -100,7 +100,7 @@ class GameScreenState extends State<GameScreen> {
   List<PlayingCard> getHand(List<int> l, {bool dealer = false}) {
     List<PlayingCard> h = [];
     for (int card in l) {
-      h.add(PlayingCard(text: dealer ? "D$card" : "$card"));
+      h.add(PlayingCard(text: dealer ? "$card" : "$card"));
     }
 
     return h;
@@ -129,7 +129,7 @@ class GameScreenState extends State<GameScreen> {
 
         return Scaffold(
           appBar: AppBar(
-            title: const Text("Game Screen"),
+            title: const Text("Blackjack!"),
           ),
           body: Column(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
