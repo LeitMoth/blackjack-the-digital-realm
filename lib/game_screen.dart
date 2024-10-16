@@ -106,13 +106,88 @@ class GameScreenState extends State<GameScreen> {
     return h;
   }
 
-  Widget score() {
+  Widget score(GameState s) {
+
+    var messages = <String>[];
+
+    var indices = <int>[];
+
+    var dealerAmount = GameState.handAmount(s.dealerHand);
+
+    for(int i = 0; i < s.playerIds.length; ++i) {
+      indices.add(i);
+      var currentHand = switch (i) {
+        0 => s.hand0,
+        1 => s.hand1,
+        2 => s.hand2,
+        _ => throw "Hand not found"
+      };
+      var amount = GameState.handAmount(currentHand);
+      if (amount > 21) {
+        messages.add("Busted!");
+      }
+      else if (dealerAmount > 21 || amount > dealerAmount) {
+        messages.add("Win! ($amount)");
+      }
+      else if (amount == dealerAmount) {
+        messages.add("Tie ($amount)");
+      } else {
+        messages.add("Lose ($amount)");
+      }
+    }
+
     return Scaffold(
-      appBar: AppBar(title: const Text("Score")),
-      body: Column(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: [Text('a winner is you!')]),
+      appBar: AppBar(
+        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
+        // title: Text("Score"),
+        //found source for backbutton here: https://www.youtube.com/watch?v=YoLbuAiYOi4
+        // leading: BackButton(
+        //   onPressed: () {
+        //     //navigate to a different page here
+        //   },
+        // ),
+      ),
+      body: Stack(
+        children: <Widget>[
+          Container(
+            color: Colors.black,
+            child: Column(
+              children: <Widget>[
+                const Padding(
+                  //make this text "Score" to be in be middle alignment (done)
+                  padding: EdgeInsets.symmetric(
+                      horizontal: 0.0, vertical: 30.0),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: <Widget>[
+                      Text(
+                        'Results',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 65,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                for (int i  in indices) 
+                  Container(
+                    height: 90,
+                    width: 300,
+                    margin:
+                        const EdgeInsets.symmetric(vertical: 15, horizontal: 30),
+                    decoration: BoxDecoration(
+                      color: const Color.fromARGB(255, 79, 78, 78),
+                      borderRadius: BorderRadius.circular(6),
+                    ),
+                    child: Center(
+                      child: Text('${s.playerNames[i]}: ${messages[i]}', style: const TextStyle(color: Colors.white, fontSize: 20),))
+                  ),
+              ],
+            ),
+          ),
+        ],
+      ),
     );
   }
 
@@ -124,7 +199,7 @@ class GameScreenState extends State<GameScreen> {
         var players = gamestate.playerIds.length;
 
         if (gamestate.finished) {
-          return score();
+          return score(gamestate);
         }
 
         return Scaffold(
