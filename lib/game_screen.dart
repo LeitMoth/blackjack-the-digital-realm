@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
@@ -50,6 +52,17 @@ class GameScreenState extends State<GameScreen> {
   //   }
   // }
 
+  void queueForScoreIfNeeded(EntangledGame curGame) {
+    if (curGame.state.isDealerDone) {
+      print("Beforetimer ${DateTime.now()}");
+      Timer(const Duration(seconds: 5), () {
+        curGame.state.finished = true;
+        curGame.push();
+      });
+      print("Aftertimer ${DateTime.now()}");
+    }
+  }
+
   Widget makePlayButtons(PlayingBlackjack state) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,
@@ -65,6 +78,7 @@ class GameScreenState extends State<GameScreen> {
                       state.currentGame.state.hit();
                       state.currentGame.push();
                       // handleAddCard(state.currentGame.state.turn);
+                      queueForScoreIfNeeded(state.currentGame);
                     });
                   },
             child: const Text("Add Card")),
@@ -74,6 +88,7 @@ class GameScreenState extends State<GameScreen> {
                 : () {
                     state.currentGame.state.stand();
                     state.currentGame.push();
+                      queueForScoreIfNeeded(state.currentGame);
                   },
             child: const Text("End Turn"))
       ],

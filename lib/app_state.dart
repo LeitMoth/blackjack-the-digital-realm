@@ -62,6 +62,9 @@ class PlayingBlackjack extends BlackjackState {
   String myUserId;
 
   bool isMyTurn() {
+    if (currentGame.state.turn >= currentGame.state.playerIds.length) {
+      return false;
+    }
     return currentGame.state.playerIds[currentGame.state.turn] == myUserId;
   }
 }
@@ -132,7 +135,7 @@ class LoggedInState {
         timestamp: DateTime.now().millisecondsSinceEpoch,
         turn: 0,
         started: false,
-        // finished: false,
+        finished: false,
         playerNames: [name],
         playerIds: [uid],
         cards: [1,2,3,4,5,6,7,8,9,10,11,12],

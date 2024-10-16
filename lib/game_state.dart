@@ -1,7 +1,7 @@
 class GameState {
   GameState({
     required this.started,
-    // required this.finished,
+    required this.finished,
     required this.playerIds,
     required this.playerNames,
     required this.cards,
@@ -16,7 +16,7 @@ class GameState {
   int timestamp;
   int turn;
   bool started;
-  // bool finished;
+  bool finished;
   List<String> playerIds;
   List<String> playerNames;
   List<int> cards;
@@ -45,7 +45,7 @@ class GameState {
     }
   }
 
-  bool get finished => turn == playerIds.length;
+  bool get isDealerDone => turn == playerIds.length;
 
   void stand() {
     turn += 1;
@@ -83,7 +83,7 @@ class GameState {
       hand1: getList<int>(data['hand1']),
       hand2: getList<int>(data['hand2']),
       started: data['started'] as bool,
-      // finished: data['finished'] as bool,
+      finished: data['finished'] as bool,
       playerIds: getList<String>(data['playerIds']),
       playerNames: getList<String>(data['playerNames']),
     );
@@ -99,7 +99,7 @@ class GameState {
       'hand2': hand2,
       'dealerHand': dealerHand,
       'started': started,
-      // 'finished': finished,
+      'finished': finished,
       'playerIds': playerIds,
       'playerNames': playerNames,
     };
