@@ -77,8 +77,8 @@ class _HomePageState extends State<HomePage> {
                         ],
                       ),
                     ),
-                    for (GameState game
-                        in appState.games.where((g) => !g.started))
+                    for ((String, GameState) idGame 
+                        in appState.loggedInState?.games.where((g) => !g.$2.started) ?? [])
                       Container(
                           padding: const EdgeInsets.all(8.0),
                           height: 90,
@@ -91,9 +91,9 @@ class _HomePageState extends State<HomePage> {
                           child: Column(children: [
                             // Text("${game.started}"),
                             // Text("${game.playerIds}"),
-                            Text("${game.playerNames}"),
+                            Text("${idGame.$2.playerNames}"),
                             TextButton(onPressed: () {
-                              appState.joinLobby(game.docId, context);
+                              appState.loggedInState?.joinLobby(idGame.$1, context);
                             }, child: const Text("Join"))
                           ])),
                   ],
@@ -135,7 +135,7 @@ class _HomePageState extends State<HomePage> {
   void showLobbyDialog(BuildContext context) {
     //TODO(colin): Testing, remove later
     var state = Provider.of<ApplicationState>(context, listen: false);
-    state.makeLobby(context);
+    state.loggedInState?.makeLobby(context);
 
     var time = Timestamp.now();
 
@@ -156,7 +156,7 @@ class _HomePageState extends State<HomePage> {
             ),
             TextButton(
               onPressed: () {
-                state.startGame();
+                state.loggedInState?.startGame();
                 //Closes screen when clicked (change this later)
                 Navigator.of(context).pop();
               },

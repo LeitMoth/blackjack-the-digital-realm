@@ -1,5 +1,11 @@
-import 'package:flutter/material.dart';
+import 'dart:async';
 
+import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
+import 'package:provider/provider.dart';
+
+import 'app_state.dart';
+import 'game_state.dart';
 import 'widgets/playing_card.dart';
 import 'widgets/playing_hand.dart';
 
@@ -16,127 +22,146 @@ class GameScreen extends StatefulWidget {
 //TODO: make a custom back arrow
 
 class GameScreenState extends State<GameScreen> {
-  int turn = 0;
+  // int turn = 0;
+  //
+  // List<PlayingCard> dealerHand = [
+  //   const PlayingCard(text: "Card 1"),
+  //   const PlayingCard(text: "Card 2")
+  // ];
+  // List<PlayingCard> hand0 = [
+  //   const PlayingCard(text: "Card 1"),
+  //   const PlayingCard(text: "Card 2")
+  // ];
+  // List<PlayingCard> hand1 = [
+  //   const PlayingCard(text: "Card 1"),
+  //   const PlayingCard(text: "Card 2")
+  // ];
+  // List<PlayingCard> hand2 = [
+  //   const PlayingCard(text: "Card 1"),
+  //   const PlayingCard(text: "Card 2")
+  // ];
+  //
+  // void handleAddCard(int turn) {
+  //   switch (turn) {
+  //     case (0):
+  //       dealerHand.add(const PlayingCard(text: "New Card"));
+  //     case (1):
+  //       hand0.add(const PlayingCard(text: "New Card"));
+  //     case (2):
+  //       hand1.add(const PlayingCard(text: "New Card"));
+  //     case (3):
+  //       hand2.add(const PlayingCard(text: "New Card"));
+  //   }
+  // }
 
-  List<PlayingCard> hand0 = [];
-  List<PlayingCard> hand1 = [];
-  List<PlayingCard> hand2 = [];
-  List<PlayingCard> hand3 = [];
-
-  @override
-  void initState() {
-    super.initState();
-    hand0 = generateRandomHand();
-    hand1 = generateRandomHand();
-    hand2 = generateRandomHand();
-    hand3 = generateRandomHand();
+  void queueForScoreIfNeeded(EntangledGame curGame) {
+    if (curGame.state.isDealerDone) {
+      print("Beforetimer ${DateTime.now()}");
+      Timer(const Duration(seconds: 5), () {
+        curGame.state.finished = true;
+        curGame.push();
+      });
+      print("Aftertimer ${DateTime.now()}");
+    }
   }
 
-  PlayingCard randomCard() {
-    // Returns a random card
-    // TODO: Henry: Implement Random Suit Selection
-    Random random = Random();
-    int number = random.nextInt(13) + 1;
-    if(number == 1) {
-      return const PlayingCard(text: "A");
-    }
-    if (number == 11) {
-      return const PlayingCard(text: "J");
-    }
-    if (number == 12) {
-      return const PlayingCard(text: "Q");
-    }
-    if (number == 13) {
-      return const PlayingCard(text: "K");
-    }
-    else{
-      String cardValue = number.toString();
-      return PlayingCard(text: cardValue);
-    }
+  Widget makePlayButtons(PlayingBlackjack state) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        ElevatedButton(
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.green,
+            ),
+            onPressed: !state.isMyTurn()
+                ? null
+                : () {
+                    setState(() {
+                      state.currentGame.state.hit();
+                      state.currentGame.push();
+                      // handleAddCard(state.currentGame.state.turn);
+                      queueForScoreIfNeeded(state.currentGame);
+                    });
+                  },
+            child: const Text("Add Card")),
+        ElevatedButton(
+            onPressed: !state.isMyTurn()
+                ? null
+                : () {
+                    state.currentGame.state.stand();
+                    state.currentGame.push();
+                      queueForScoreIfNeeded(state.currentGame);
+                  },
+            child: const Text("End Turn"))
+      ],
+    );
   }
 
-  List<PlayingCard> generateRandomHand() {
-    return [
-      randomCard(), 
-      randomCard()
-    ];
+  List<PlayingCard> getHand(List<int> l, {bool dealer = false}) {
+    List<PlayingCard> h = [];
+    for (int card in l) {
+      h.add(PlayingCard(text: dealer ? "D$card" : "$card"));
+    }
+
+    return h;
   }
 
-  void handleAddCard() {
-    // TODO: Check for bust
-    switch (turn) {
-      case (0):
-        hand0.add(randomCard());
-      case (1):
-        hand1.add(randomCard());
-      case (2):
-        hand2.add(randomCard());
-      case (3):
-        hand3.add(randomCard());
-    }
+  Widget score() {
+    return Scaffold(
+      appBar: AppBar(title: const Text("Score")),
+      body: Column(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [Text('a winner is you!')]),
+    );
   }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-        appBar: AppBar(
-          title: const Text("Game Screen"),
-        ),
-        body: Column(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: [
-            PlayingHand(
-              side: false,
-              cards: hand0,
+    return Consumer<ApplicationState>(builder: (ctx, appState, _) {
+      if (appState.loggedInState?.state case PlayingBlackjack playstate) {
+        var gamestate = playstate.currentGame.state;
+        var players = gamestate.playerIds.length;
+
+        if (gamestate.finished) {
+          return score();
+        }
+
+        return Scaffold(
+            appBar: AppBar(
+              title: const Text("Game Screen"),
             ),
-            Row(
+            body: Column(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              crossAxisAlignment: CrossAxisAlignment.center,
               children: [
-                PlayingHand(side: true, cards: hand1),
+                PlayingHand(
+                  side: false,
+                  cards: getHand(gamestate.dealerHand, dealer: true),
+                ),
                 Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    ElevatedButton(
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.green,
-                        ),
-                        onPressed: () {
-                          setState(() {
-                            handleAddCard();
-                          });
-                        },
-                        child: const Text("Add Card")),
-                    ElevatedButton(
-                        onPressed: () {
-                          //end turn
-                          if (turn == 3) {
-                            turn = 0;
-                          }
-                          turn += 1;
-                        },
-                        child: const Text("End Turn"))
+                    PlayingHand(
+                        side: true,
+                        cards: players < 1 ? [] : getHand(gamestate.hand0)),
+                    makePlayButtons(playstate),
+                    PlayingHand(
+                      side: true,
+                      cards: players < 2 ? [] : getHand(gamestate.hand1),
+                    )
                   ],
                 ),
                 PlayingHand(
-                  side: true,
-                  cards: hand2,
-                )
+                  side: false,
+                  cards: players < 3 ? [] : getHand(gamestate.hand2),
+                ),
               ],
             ),
-            PlayingHand(
-              side: false,
-              cards: hand3,
-            ),
-          ],
-        ),
-        floatingActionButton: FloatingActionButton(onPressed: () {
-          setState(() {
-            hand1.add(randomCard());
-            hand2.add(randomCard());
-            hand3.add(randomCard());
-            hand0.add(randomCard());
-          });
-        }));
+        );
+      } else {
+        return Scaffold(appBar: AppBar(title: const Text("BIG ERROR!")));
+      }
+    });
   }
 }
