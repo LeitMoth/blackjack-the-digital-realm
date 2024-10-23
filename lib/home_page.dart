@@ -195,6 +195,7 @@ class _HomePageState extends State<HomePage> {
           actions: <Widget>[
             TextButton(
               onPressed: () {
+                state.loggedInState?.cancelGame();
                 //close the screen
                 Navigator.of(context).pop();
               },

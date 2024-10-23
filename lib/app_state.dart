@@ -222,6 +222,29 @@ class LoggedInState {
       print("Could not game, as we weren't in the waiting to join state");
     }
   }
+
+  void cancelGame() {
+    if (state case WaitingToJoin w) {
+      // IMPORTANT: we need to do this so we don't join the game
+      state = NoBlackjack();
+
+      // Messy: we just start an empty game instead of properly deleting
+      // this is probably fine.
+      // Also we reset state above, that looks like it works?
+
+      //TODO(colin): while this works for the person who
+      // started the lobby, this puts anyone who pressed
+      // join into the lobby the same as any one else.
+      // a more proper way of doing this is make a
+      // 'canceled' field and set that to true, then
+      // handle this in the firestore updates just
+      // like how we handle 'started'
+      w.currentGame.state.started = true;
+      w.currentGame.push();
+    } else {
+      print("Could not cancel game, we aren't in a game");
+    }
+  }
 }
 
 class ApplicationState extends ChangeNotifier {
