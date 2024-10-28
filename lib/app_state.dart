@@ -138,15 +138,13 @@ class LoggedInState {
     var uid = FirebaseAuth.instance.currentUser!.uid;
 
     var deck = <int>[];
-    for(int i = 1; i < 10; ++i) {
-      deck.add(i);
-      deck.add(i);
-      deck.add(i);
-      deck.add(i);
+    for(int i = 1; i < 14; ++i) {
+      for(int j = 0; j < 4; ++j) {
+        deck.add(i * 10 + j);
+        //The last digit of the number is the suit of the card
+      }  
     }
-    for(int i = 0; i < 4*4; ++i) {
-      deck.add(10);
-    }
+    
 
     deck.shuffle();
 
