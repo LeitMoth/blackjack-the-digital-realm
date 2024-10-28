@@ -29,14 +29,17 @@ class GameState {
     int amount = 0;
     amount += hand.where((c) => (c~/10) < 11).fold(0, (x, y) => x + y~/ 10);
     
-    //Adds 10 for each face card
-    for (int c in hand.where((c) => (c~/10) > 10 || c~/10 == 1)){
-
+    //Adds 10 for face cards
+    for (int c in hand.where((c) => (c~/10) > 10)){
+      amount += 10;
+    }
+    
+    //Aces
+    for (int c in hand.where((c) => (c~/10) == 1)){
       //Only adds 10 for aces if the amount wouldn't pass 21
-      if((c~/10 == 1 && amount + 10 <= 21) || c > 10){
+      if(amount + 10 <= 21){
         amount += 10;   
       }
-       
     }
     return amount;
   }
